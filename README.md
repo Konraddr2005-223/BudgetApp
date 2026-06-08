@@ -1,4 +1,4 @@
-# ZadSoft - Osobisty Menadżer Budżetu REST API
+# BudgetApp - Osobisty Menadżer Budżetu REST API
 
 Aplikacja do zarządzania budżetem osobistym, napisana w technologii **Spring Boot 3.3.4** oraz **Java 17+** (w pełni przetestowana pod OpenJDK 25).
 Pozwala użytkownikowi na śledzenie salda wielu kont bankowych/gotówkowych, ewidencjonowanie transakcji (przychody i wydatki), monitorowanie limitów wydatków dla poszczególnych kategorii oraz pobieranie raportów w formacie CSV.
