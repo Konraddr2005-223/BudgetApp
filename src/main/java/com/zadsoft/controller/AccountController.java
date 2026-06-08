@@ -21,7 +21,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/accounts")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class AccountController {
 
     private final AccountService accountService;
@@ -71,7 +70,7 @@ public class AccountController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         for (TransactionDto t : transactions) {
             String desc = t.getDescription() != null ? t.getDescription().replace(";", " ") : "";
-            writer.println(String.format("%d;%.2f;%s;%s;%s;%s",
+            writer.println(String.format(java.util.Locale.US, "%d;%.2f;%s;%s;%s;%s",
                     t.getId(),
                     t.getAmount(),
                     t.getType().name(),

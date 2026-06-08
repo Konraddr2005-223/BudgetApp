@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/category-limits")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class CategoryLimitController {
 
     private final CategoryLimitService categoryLimitService;
