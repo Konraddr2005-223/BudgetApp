@@ -176,4 +176,26 @@ public class TransactionServiceTest {
         verify(transactionRepository, times(1)).delete(tx);
         verify(accountRepository, times(1)).save(testAccount);
     }
+
+    @Test
+    void testAddExpenseTransactionAllowsNegativeBalance() {
+        // Arrange
+        TransactionDto dto = TransactionDto.builder()
+                .accountId(1L)
+                .amount(new BigDecimal("1200.00"))
+                .type(TransactionType.EXPENSE)
+                .category("Zakupy")
+                .transactionDate(LocalDateTime.now())
+                .build();
+
+        when(accountRepository.findByIdWithLock(1L)).thenReturn(Optional.of(testAccount));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        TransactionCreationResult result = transactionService.addTransaction(dto);
+
+        // Assert
+        assertEquals(new BigDecimal("-200.00"), testAccount.getBalance());
+        verify(accountRepository, times(1)).save(testAccount);
+    }
 }
