@@ -34,3 +34,6 @@ build/
 
 # Lokalnie pobrane JDK 17
 /jdk-17/
+
+# Pliki środowiskowe Dockera (sekrety)
+.env
