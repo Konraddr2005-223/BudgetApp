@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetApp - Menadżer Budżetu</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Toast Notification Area -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Sidebar / Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <i class="fa-solid fa-wallet logo-icon"></i>
+                <h2>BudgetApp</h2>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" id="nav-dashboard">
+                    <i class="fa-solid fa-chart-line"></i> Pulpit
+                </a>
+                <a href="/swagger-ui/index.html" target="_blank" class="nav-item">
+                    <i class="fa-solid fa-book"></i> Dokumentacja API
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="status-indicator online"></span>
+                    <span class="status-text">Serwer aktywny</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="welcome-text">
+                    <h1>Mój Budżet</h1>
+                    <p>Proste i czytelne zestawienie finansów osobistych.</p>
+                </div>
+                
+                <div class="total-balance-card">
+                    <div class="balance-label">Całkowite Saldo</div>
+                    <div class="balance-value" id="global-balance">0.00 zł</div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="content-body">
+                
+                <!-- Financial Summary Widgets -->
+                <section class="summary-widgets">
+                    <div class="widget-card income">
+                        <span class="widget-label">Suma Przychodów</span>
+                        <h3 class="widget-value" id="summary-income">0.00 zł</h3>
+                    </div>
+                    
+                    <div class="widget-card expense">
+                        <span class="widget-label">Suma Wydatków</span>
+                        <h3 class="widget-value" id="summary-expense">0.00 zł</h3>
+                    </div>
+
+                    <div class="widget-card net">
+                        <span class="widget-label">Bilans Netto</span>
+                        <h3 class="widget-value" id="summary-net">0.00 zł</h3>
+                    </div>
+                </section>
+
+                <div class="grid-layout">
+                    <!-- Column 1: Accounts and Limits -->
+                    <div class="grid-col-1">
+                        
+                        <!-- Account Manager -->
+                        <div class="standard-card">
+                            <div class="card-header">
+                                <h3>Konta</h3>
+                                <button class="btn btn-primary btn-sm" onclick="showModal('account-modal')">
+                                    Dodaj konto
+                                </button>
+                            </div>
+                            <div class="accounts-list" id="accounts-list">
+                                <div class="loading-spinner">Ładowanie kont...</div>
+                            </div>
+                        </div>
+
+                        <!-- Budget Limits Manager -->
+                        <div class="standard-card">
+                            <div class="card-header">
+                                <h3>Limity Kategorii</h3>
+                                <button class="btn btn-primary btn-sm" onclick="showModal('limit-modal')">
+                                    Ustaw limit
+                                </button>
+                            </div>
+                            <div class="limits-list" id="limits-list">
+                                <div class="loading-spinner">Ładowanie limitów...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Transactions and Structure -->
+                    <div class="grid-col-2">
+                        
+                        <!-- Expenses Breakdown -->
+                        <div class="standard-card">
+                            <div class="card-header">
+                                <h3>Wydatki według kategorii</h3>
+                            </div>
+                            <div class="chart-container" id="expenses-breakdown">
+                                <div class="empty-state">Brak wydatków w wybranym okresie.</div>
+                            </div>
+                        </div>
+
+                        <!-- Transactions History with Filter -->
+                        <div class="standard-card" id="card-transactions-list">
+                            <div class="card-header flex-column">
+                                <div class="flex-row w-100 justify-content-between">
+                                    <h3>Historia Transakcji</h3>
+                                    <button class="btn btn-success" onclick="showModal('transaction-modal')">
+                                        Dodaj transakcję
+                                    </button>
+                                </div>
+                                
+                                <!-- Filters -->
+                                <div class="filter-bar">
+                                    <div class="filter-input-group">
+                                        <label>Od</label>
+                                        <input type="date" id="filter-from">
+                                    </div>
+                                    <div class="filter-input-group">
+                                        <label>Do</label>
+                                        <input type="date" id="filter-to">
+                                    </div>
+                                    <div class="filter-input-group">
+                                        <label>Kategoria</label>
+                                        <input type="text" id="filter-category" placeholder="Wyszukaj...">
+                                    </div>
+                                    <div class="filter-actions">
+                                        <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+                                        <button class="btn btn-primary" onclick="loadData()">Filtruj</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="transactions-table-container">
+                                <table class="transactions-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Opis / Kategoria</th>
+                                            <th>Konto</th>
+                                            <th>Kwota</th>
+                                            <th>Usuń</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactions-list-body">
+                                        <tr>
+                                            <td colspan="5" class="text-center">Ładowanie...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    
+    <!-- Account Modal -->
+    <div id="account-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Nowe Konto</h3>
+                <button class="close-btn" onclick="closeModal('account-modal')">&times;</button>
+            </div>
+            <form id="account-form" onsubmit="handleAccountSubmit(event)">
+                <div class="form-group">
+                    <label for="account-name">Nazwa konta</label>
+                    <input type="text" id="account-name" placeholder="np. Portfel, PKO" required>
+                </div>
+                <div class="form-group">
+                    <label for="account-balance">Saldo początkowe (zł)</label>
+                    <input type="number" id="account-balance" step="0.01" value="0.00" min="0">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('account-modal')">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Dodaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Limit Modal -->
+    <div id="limit-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Ustaw limit kategorii</h3>
+                <button class="close-btn" onclick="closeModal('limit-modal')">&times;</button>
+            </div>
+            <form id="limit-form" onsubmit="handleLimitSubmit(event)">
+                <div class="form-group">
+                    <label for="limit-category">Kategoria</label>
+                    <input type="text" id="limit-category" placeholder="np. Jedzenie" required>
+                </div>
+                <div class="form-group">
+                    <label for="limit-amount">Miesięczny limit (zł)</label>
+                    <input type="number" id="limit-amount" step="0.01" min="0.01" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('limit-modal')">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Zapisz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transaction-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Nowa transakcja</h3>
+                <button class="close-btn" onclick="closeModal('transaction-modal')">&times;</button>
+            </div>
+            <form id="transaction-form" onsubmit="handleTransactionSubmit(event)">
+                <div class="form-group">
+                    <label for="tx-account">Konto</label>
+                    <select id="tx-account" required>
+                        <option value="">Wybierz konto...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Typ transakcji</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="tx-type" value="INCOME" checked> Przychód
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="tx-type" value="EXPENSE"> Wydatek
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tx-amount">Kwota (zł)</label>
+                    <input type="number" id="tx-amount" step="0.01" min="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="tx-category">Kategoria</label>
+                    <input type="text" id="tx-category" placeholder="np. Jedzenie, Wynagrodzenie" required>
+                </div>
+                <div class="form-group">
+                    <label for="tx-description">Opis</label>
+                    <input type="text" id="tx-description" placeholder="Opcjonalny opis">
+                </div>
+                <div class="form-group">
+                    <label for="tx-date">Data transakcji</label>
+                    <input type="datetime-local" id="tx-date" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('transaction-modal')">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Dodaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS script -->
+    <script src="app.js?v=2"></script>
+</body>
+</html>
